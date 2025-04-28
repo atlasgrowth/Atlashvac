@@ -1,0 +1,48 @@
+1. Prompt to paste into Replit ► “Deploy-an-Agent”
+Project Name: Home-Services SaaS with Auto-Generated Marketing Sites
+Stack: React + TypeScript + Tailwind (frontend), Next.js app-router for public sites, Supabase (Postgres + Auth) for data, Prisma ORM, tRPC for typed API, Vercel deployment.
+
+Core goals
+
+Dynamic one-page marketing sites generated per business record (hydrated from Outscraper CSV).
+
+Operator portal (internal dashboard) with tabs: Dashboard, Messages, Contacts, Reviews, Schedule, Automations, Website, Settings.
+
+How it works
+• A cron job ingests the Outscraper CSV into the Business table and pre-computes a unique slug.
+• Public route /[slug] renders the one-page site. Layout blocks (hero, about, services, CTA, footer) pull text/images from Business columns and a verticals.json preset (HVAC/plumbing/etc.).
+• Each site embeds a <ChatWidget businessId="..." /> that connects to Supabase Realtime → messages land in the operator portal’s Messages tab.
+• The portal runs under /app/* and shares the same Supabase back-end. Tabs use tRPC hooks—for example, trpc.messages.list.useQuery({businessId}).
+• Schedule tab renders a FullCalendar React component; job rows reference Contact, Equipment, and Technician tables.
+• Reviews tab calls the Google Business Profile API daily; new reviews trigger a Supabase function that bumps an unreadReviews counter.
+• Automations tab stores JSON workflow graphs (trigger, filter, action[]). A background worker executes them (e.g., “Job marked complete → send SMS review request”).
+• For custom domains the user adds a CNAME; a Next.js middleware rewrites Host headers and Supabase stores the verified domain + Let’s Encrypt cert via the Vercel Domains API.
+
+MVP order (6 sprints)
+
+Scaffold repo, set up Supabase, create Prisma schema.
+
+CSV import → live marketing pages (/[slug]) + chat widget (console log only).
+
+Operator portal shell with Messages tab wired to Supabase Realtime.
+
+Contacts CRUD + Schedule calendar.
+
+Reviews polling + simple Automations (“after job, send review SMS”).
+
+Custom domains + multi-vertical presets.
+
+Success criteria
+• Able to import 10 HVAC rows → visit /demo/arctic-air-experts etc. within 1 hour.
+• Operator can reply to a chat and see it mirrored on the public site.
+• After marking a job complete the customer receives a review-request SMS.
+
+Constraints
+– Keep all env secrets in Replit’s Secrets Manager.
+– Use Tailwind for all styling; theme tokens live in Business.theme JSON.
+– No hard-coded HVAC jargon inside components—read from verticals.json.
+
+Deliverables
+• Monorepo with apps/portal, apps/site, packages/db, packages/ui.
+• Prisma ERD diagram in docs/erd.png.
+• README with npx supabase start + npm run dev instructions.
