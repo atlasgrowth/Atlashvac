@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useBusinessContext } from '@/hooks/useBusinessContext';
+import { BusinessStats, Activity } from '@shared/types';
 import {
   Card,
   CardContent,
@@ -85,13 +86,13 @@ export function DashboardPage() {
   const businessId = currentBusiness?.id;
   
   // Fetch business stats
-  const { data: stats, isLoading: isLoadingStats } = useQuery({
+  const { data: stats = {} as BusinessStats, isLoading: isLoadingStats } = useQuery<BusinessStats>({
     queryKey: [`/api/businesses/${businessId}/stats`],
     enabled: !!businessId,
   });
   
   // Fetch recent activities
-  const { data: activities = [], isLoading: isLoadingActivities } = useQuery({
+  const { data: activities = [] as Activity[], isLoading: isLoadingActivities } = useQuery<Activity[]>({
     queryKey: [`/api/businesses/${businessId}/activities`],
     enabled: !!businessId,
   });
@@ -197,7 +198,7 @@ export function DashboardPage() {
                     </div>
                   ))
                 ) : activities.length > 0 ? (
-                  activities.slice(0, 4).map((activity: any) => (
+                  activities.slice(0, 4).map((activity: Activity) => (
                     <div key={activity.id} className="flex gap-4">
                       <div className="flex-shrink-0">
                         <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600">
