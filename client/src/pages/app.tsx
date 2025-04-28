@@ -12,6 +12,7 @@ import { WebsitePage } from '@/components/website/WebsitePage';
 import { SettingsPage } from '@/components/settings/SettingsPage';
 import { useBusinessContext } from '@/hooks/useBusinessContext';
 import { Business } from '@shared/schema';
+import { safelySetBusinessData } from '@/lib/utils';
 
 export default function AppPage() {
   const [, navigate] = useLocation();
@@ -27,7 +28,10 @@ export default function AppPage() {
   // Set first business as current business if none is selected
   useEffect(() => {
     if (businesses.length > 0 && !isLoading) {
-      setCurrentBusiness(businesses[0]);
+      const safeBusiness = safelySetBusinessData(businesses[0]);
+      if (safeBusiness) {
+        setCurrentBusiness(safeBusiness);
+      }
     }
   }, [businesses, isLoading, setCurrentBusiness]);
 

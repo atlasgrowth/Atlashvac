@@ -7,23 +7,32 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Helper to handle null vs undefined in the Business type
-export function safelySetBusinessData(business: Business | null): Business | null {
+export function safelySetBusinessData(business: any): Business | null {
   if (!business) return null;
   
-  // Convert null values to undefined for type compatibility
-  const safeBusiness = { ...business };
-  
-  // For each possibly null field, convert to undefined if null
-  if (safeBusiness.description === null) safeBusiness.description = undefined;
-  if (safeBusiness.address === null) safeBusiness.address = undefined;
-  if (safeBusiness.city === null) safeBusiness.city = undefined;
-  if (safeBusiness.state === null) safeBusiness.state = undefined;
-  if (safeBusiness.zip === null) safeBusiness.zip = undefined;
-  if (safeBusiness.phone === null) safeBusiness.phone = undefined;
-  if (safeBusiness.email === null) safeBusiness.email = undefined;
-  if (safeBusiness.website === null) safeBusiness.website = undefined;
-  if (safeBusiness.logo === null) safeBusiness.logo = undefined;
-  if (safeBusiness.customDomain === null) safeBusiness.customDomain = undefined;
+  // Create a new object with the same shape but converting nulls to undefined
+  const safeBusiness: Partial<Business> = {
+    id: business.id,
+    name: business.name,
+    slug: business.slug,
+    // Convert null to undefined for optional fields
+    description: business.description === null ? undefined : business.description,
+    address: business.address === null ? undefined : business.address,
+    city: business.city === null ? undefined : business.city,
+    state: business.state === null ? undefined : business.state,
+    zip: business.zip === null ? undefined : business.zip,
+    phone: business.phone === null ? undefined : business.phone,
+    email: business.email === null ? undefined : business.email,
+    website: business.website === null ? undefined : business.website,
+    logo: business.logo === null ? undefined : business.logo,
+    customDomain: business.customDomain === null ? undefined : business.customDomain,
+    vertical: business.vertical,
+    userId: business.userId,
+    createdAt: business.createdAt,
+    updatedAt: business.updatedAt,
+    theme: business.theme,
+    settings: business.settings
+  };
   
   return safeBusiness as Business;
 }
