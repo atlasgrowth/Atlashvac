@@ -59,12 +59,12 @@ export function AppShell({ children, currentPage = 'dashboard' }: AppShellProps)
   const [, navigate] = useLocation();
   
   // Fetch all businesses
-  const { data: businesses = [], isLoading: isLoadingBusinesses } = useQuery({
+  const { data: businesses = [] as Business[], isLoading: isLoadingBusinesses } = useQuery<Business[]>({
     queryKey: ['/api/businesses'],
   });
   
   // Handle business selection
-  const handleBusinessSelect = (business: any) => {
+  const handleBusinessSelect = (business: Business) => {
     setCurrentBusiness(business);
   };
   
@@ -94,9 +94,9 @@ export function AppShell({ children, currentPage = 'dashboard' }: AppShellProps)
         <div className="flex flex-col flex-1 min-h-0 border-r border-gray-200">
           {/* Sidebar header */}
           <div className="flex items-center justify-between h-16 flex-shrink-0 px-4 border-b border-gray-200">
-            <Link href="/app">
-              <a className="font-bold text-xl text-primary-600">HomeServe</a>
-            </Link>
+            <div className="font-bold text-xl text-primary-600">
+              <Link href="/app">HomeServe</Link>
+            </div>
             <button
               type="button"
               className="md:hidden"
@@ -166,15 +166,14 @@ export function AppShell({ children, currentPage = 'dashboard' }: AppShellProps)
               const isActive = currentPage === item.href.split('/').pop();
               
               return (
-                <Link key={item.name} href={item.href}>
-                  <a
+                <div key={item.name}>
+                  <Link href={item.href} 
                     className={cn(
                       'flex items-center px-3 py-2 text-sm font-medium rounded-md group',
                       isActive
                         ? 'bg-primary-50 text-primary-700'
                         : 'text-gray-700 hover:bg-gray-50'
-                    )}
-                  >
+                    )}>
                     <item.icon
                       className={cn(
                         'mr-3 h-5 w-5 flex-shrink-0',
@@ -182,8 +181,8 @@ export function AppShell({ children, currentPage = 'dashboard' }: AppShellProps)
                       )}
                     />
                     {item.name}
-                  </a>
-                </Link>
+                  </Link>
+                </div>
               );
             })}
           </nav>
