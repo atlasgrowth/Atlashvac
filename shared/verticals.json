@@ -1,0 +1,247 @@
+{
+  "hvac": {
+    "name": "HVAC",
+    "fullName": "Heating, Ventilation & Air Conditioning",
+    "description": "Professional heating and cooling services with 24/7 emergency support.",
+    "services": [
+      {
+        "name": "AC Installation & Repair",
+        "description": "Expert installation of new AC systems and prompt repair services for all makes and models.",
+        "icon": "snowflake"
+      },
+      {
+        "name": "Heating System Services",
+        "description": "Comprehensive furnace and heat pump services including installation, repair, and maintenance.",
+        "icon": "fire"
+      },
+      {
+        "name": "Indoor Air Quality",
+        "description": "Solutions to improve your home's air quality including air purifiers, humidifiers, and advanced filtration systems.",
+        "icon": "droplet"
+      },
+      {
+        "name": "Maintenance Plans",
+        "description": "Regular maintenance programs to ensure your HVAC system operates efficiently year-round.",
+        "icon": "calendar-check"
+      }
+    ],
+    "cta": "Schedule a service call today to keep your home comfortable year-round.",
+    "heroTitle": "Expert HVAC Solutions",
+    "heroSubtitle": "For Your Home & Business",
+    "colors": {
+      "primary": "#4f46e5",
+      "secondary": "#10B981",
+      "accent": "#F59E0B"
+    }
+  },
+  "plumbing": {
+    "name": "Plumbing",
+    "fullName": "Plumbing Services",
+    "description": "Professional plumbing services with 24/7 emergency support.",
+    "services": [
+      {
+        "name": "Leak Detection & Repair",
+        "description": "Advanced technology to detect and fix leaks quickly, preventing water damage and high bills.",
+        "icon": "droplet"
+      },
+      {
+        "name": "Drain Cleaning",
+        "description": "Professional drain cleaning services to remove clogs and restore proper flow.",
+        "icon": "wind"
+      },
+      {
+        "name": "Water Heater Services",
+        "description": "Installation, repair, and maintenance of tankless and traditional water heaters.",
+        "icon": "thermometer"
+      },
+      {
+        "name": "Plumbing Fixture Installation",
+        "description": "Expert installation of sinks, faucets, toilets, and other fixtures for kitchens and bathrooms.",
+        "icon": "tool"
+      }
+    ],
+    "cta": "Call us today for any plumbing emergency or installation needs.",
+    "heroTitle": "Professional Plumbing Solutions",
+    "heroSubtitle": "For Residential & Commercial Properties",
+    "colors": {
+      "primary": "#0284c7",
+      "secondary": "#14b8a6",
+      "accent": "#f59e0b"
+    }
+  },
+  "electrical": {
+    "name": "Electrical",
+    "fullName": "Electrical Services",
+    "description": "Professional electrical services with safety as our top priority.",
+    "services": [
+      {
+        "name": "Electrical Repairs",
+        "description": "Fast and reliable repairs for all electrical issues from outlets to breaker panels.",
+        "icon": "zap"
+      },
+      {
+        "name": "Lighting Installation",
+        "description": "Expert installation of interior and exterior lighting fixtures and systems.",
+        "icon": "lightbulb"
+      },
+      {
+        "name": "Panel Upgrades",
+        "description": "Electrical panel upgrades to safely handle modern electricity demands.",
+        "icon": "server"
+      },
+      {
+        "name": "Electrical Inspections",
+        "description": "Thorough inspections to identify potential hazards and ensure code compliance.",
+        "icon": "check-circle"
+      }
+    ],
+    "cta": "Contact us for all your electrical needs, from minor repairs to major installations.",
+    "heroTitle": "Expert Electrical Services",
+    "heroSubtitle": "Safe & Reliable Solutions",
+    "colors": {
+      "primary": "#d946ef",
+      "secondary": "#0ea5e9",
+      "accent": "#f97316"
+    }
+  },
+  "cleaning": {
+    "name": "Cleaning",
+    "fullName": "Cleaning Services",
+    "description": "Professional cleaning services for homes and businesses.",
+    "services": [
+      {
+        "name": "Residential Cleaning",
+        "description": "Comprehensive cleaning services for homes of all sizes.",
+        "icon": "home"
+      },
+      {
+        "name": "Commercial Cleaning",
+        "description": "Professional cleaning solutions for offices and commercial spaces.",
+        "icon": "building"
+      },
+      {
+        "name": "Deep Cleaning",
+        "description": "Thorough deep cleaning services to tackle the toughest dirt and grime.",
+        "icon": "check-square"
+      },
+      {
+        "name": "Specialized Cleaning",
+        "description": "Specialized cleaning for carpets, upholstery, and other surfaces.",
+        "icon": "sparkles"
+      }
+    ],
+    "cta": "Schedule a cleaning service today and enjoy a spotless environment.",
+    "heroTitle": "Professional Cleaning Services",
+    "heroSubtitle": "For Homes & Businesses",
+    "colors": {
+      "primary": "#0891b2",
+      "secondary": "#22c55e",
+      "accent": "#f97316"
+    }
+  },
+  "landscaping": {
+    "name": "Landscaping",
+    "fullName": "Landscaping Services",
+    "description": "Professional landscaping services to enhance your outdoor spaces.",
+    "services": [
+      {
+        "name": "Landscape Design",
+        "description": "Creative landscape design services to transform your outdoor spaces.",
+        "icon": "map"
+      },
+      {
+        "name": "Lawn Maintenance",
+        "description": "Regular maintenance to keep your lawn healthy and beautiful.",
+        "icon": "scissors"
+      },
+      {
+        "name": "Tree & Shrub Care",
+        "description": "Expert care for trees and shrubs, including pruning and disease treatment.",
+        "icon": "leaf"
+      },
+      {
+        "name": "Irrigation Systems",
+        "description": "Installation and maintenance of efficient irrigation systems.",
+        "icon": "cloud-rain"
+      }
+    ],
+    "cta": "Contact us to transform your outdoor spaces into beautiful, functional areas.",
+    "heroTitle": "Professional Landscaping",
+    "heroSubtitle": "Creating Beautiful Outdoor Spaces",
+    "colors": {
+      "primary": "#16a34a",
+      "secondary": "#0ea5e9",
+      "accent": "#f59e0b"
+    }
+  },
+  "roofing": {
+    "name": "Roofing",
+    "fullName": "Roofing Services",
+    "description": "Professional roofing services for residential and commercial properties.",
+    "services": [
+      {
+        "name": "Roof Installation",
+        "description": "Professional installation of new roofs with quality materials and expert craftsmanship.",
+        "icon": "home"
+      },
+      {
+        "name": "Roof Repair",
+        "description": "Prompt and reliable repairs for leaks, damage, and other roofing issues.",
+        "icon": "tool"
+      },
+      {
+        "name": "Roof Inspections",
+        "description": "Thorough inspections to identify potential issues and ensure roof integrity.",
+        "icon": "search"
+      },
+      {
+        "name": "Gutter Services",
+        "description": "Installation, repair, and maintenance of gutters and downspouts.",
+        "icon": "droplet"
+      }
+    ],
+    "cta": "Protect your property with our expert roofing services.",
+    "heroTitle": "Professional Roofing Services",
+    "heroSubtitle": "Quality, Reliability, Excellence",
+    "colors": {
+      "primary": "#b91c1c",
+      "secondary": "#525252",
+      "accent": "#0ea5e9"
+    }
+  },
+  "general": {
+    "name": "General Contractor",
+    "fullName": "General Contracting Services",
+    "description": "Professional contracting services for all your home improvement needs.",
+    "services": [
+      {
+        "name": "Renovations",
+        "description": "Complete home renovation services from concept to completion.",
+        "icon": "home"
+      },
+      {
+        "name": "Additions",
+        "description": "Quality home additions to expand your living space.",
+        "icon": "plus-square"
+      },
+      {
+        "name": "Kitchen & Bath Remodels",
+        "description": "Expert kitchen and bathroom remodeling services.",
+        "icon": "layout"
+      },
+      {
+        "name": "Handyman Services",
+        "description": "Professional handyman services for repairs and small projects.",
+        "icon": "tool"
+      }
+    ],
+    "cta": "Transform your home with our expert contracting services.",
+    "heroTitle": "Professional Contracting",
+    "heroSubtitle": "Quality Home Improvement Services",
+    "colors": {
+      "primary": "#4338ca",
+      "secondary": "#0891b2",
+      "accent": "#f97316"
+    }
+  }
+}
