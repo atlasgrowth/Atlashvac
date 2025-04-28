@@ -51,7 +51,9 @@ import {
   FileText,
   Share2,
   Cloud,
+  UserPlus
 } from 'lucide-react';
+import DemoTokenGenerator from './DemoTokenGenerator';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -354,6 +356,10 @@ export function SettingsPage() {
             <TabsTrigger value="integrations" className="flex items-center">
               <Workflow className="mr-2 h-4 w-4" />
               Integrations
+            </TabsTrigger>
+            <TabsTrigger value="prospects" className="flex items-center">
+              <UserPlus className="mr-2 h-4 w-4" />
+              Prospects
             </TabsTrigger>
           </TabsList>
           
