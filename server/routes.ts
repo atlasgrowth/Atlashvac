@@ -6,7 +6,8 @@ import { parse } from "csv-parse/sync";
 import { z } from "zod";
 import { OutscraperBusinessData, WebSocketMessageType, WebSocketMessage } from "@shared/types";
 import { Activity, ActivityType } from "@shared/types";
-import { insertBusinessSchema, insertContactSchema, insertConversationSchema, insertMessageSchema, insertEquipmentSchema, insertTechnicianSchema, insertJobSchema, insertAutomationSchema } from "@shared/schema";
+import { insertBusinessSchema, insertContactSchema, insertConversationSchema, insertMessageSchema, insertEquipmentSchema, insertTechnicianSchema, insertJobSchema, insertAutomationSchema, insertDemoTokenSchema } from "@shared/schema";
+import { v4 as uuidv4 } from "uuid";
 import { createInsertSchema } from "drizzle-zod";
 import fs from "fs";
 import path from "path";
@@ -485,6 +486,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Demo token routes
+  app.post('/api/demo/businesses/:businessId/token', async (req: Request, res: Response) => {
+    try {
+      const businessId = parseInt(req.params.businessId);
+      
+      // Verify the business exists
+      const business = await storage.getBusiness(businessId);
+      if (!business) {
+        return res.status(404).json({ error: 'Business not found' });
+      }
+      
+      // Generate unique token
+      const token = uuidv4();
+      
+      // Set expiration 7 days from now
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+      
+      // Create token in database
+      const demoToken = await storage.createDemoToken({
+        token,
+        businessId,
+        expiresAt
+      });
+      
+      res.status(201).json({
+        token: demoToken.token,
+        expiresAt: demoToken.expiresAt
+      });
+    } catch (error) {
+      console.error('Failed to create demo token:', error);
+      res.status(500).json({ error: 'Failed to create demo token' });
+    }
+  });
+  
+  app.get('/api/demo/validate/:token', async (req: Request, res: Response) => {
+    try {
+      const { token } = req.params;
+      
+      const demoToken = await storage.getDemoTokenByToken(token);
+      
+      if (!demoToken) {
+        return res.status(404).json({ error: 'Invalid token' });
+      }
+      
+      // Check if token is expired
+      if (new Date() > new Date(demoToken.expiresAt)) {
+        return res.status(403).json({ error: 'Token expired' });
+      }
+      
+      // Get the business for this token
+      const business = await storage.getBusiness(demoToken.businessId);
+      
+      if (!business) {
+        return res.status(404).json({ error: 'Business not found' });
+      }
+      
+      res.json({
+        business,
+        token: demoToken.token,
+        expiresAt: demoToken.expiresAt
+      });
+    } catch (error) {
+      console.error('Failed to validate demo token:', error);
+      res.status(500).json({ error: 'Failed to validate demo token' });
+    }
+  });
+
   // Business stats
   app.get('/api/businesses/:businessId/stats', async (req: Request, res: Response) => {
     try {

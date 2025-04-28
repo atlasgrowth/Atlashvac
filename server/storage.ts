@@ -1,9 +1,9 @@
 import { 
-  users, businesses, contacts, conversations, messages, equipment, technicians, jobs, reviews, automations,
+  users, businesses, contacts, conversations, messages, equipment, technicians, jobs, reviews, automations, demoTokens,
   type User, type InsertUser, type Business, type InsertBusiness, type Contact, type InsertContact,
   type Conversation, type InsertConversation, type Message, type InsertMessage, type Equipment, 
   type InsertEquipment, type Technician, type InsertTechnician, type Job, type InsertJob,
-  type Review, type InsertReview, type Automation, type InsertAutomation
+  type Review, type InsertReview, type Automation, type InsertAutomation, type DemoToken, type InsertDemoToken
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql, like, ilike } from "drizzle-orm";
@@ -80,6 +80,11 @@ export interface IStorage {
     newMessages: number;
     avgReview: number;
   }>;
+  
+  // Demo token methods
+  getDemoToken(id: number): Promise<DemoToken | undefined>;
+  getDemoTokenByToken(token: string): Promise<DemoToken | undefined>;
+  createDemoToken(token: InsertDemoToken): Promise<DemoToken>;
 }
 
 export class DatabaseStorage implements IStorage {
