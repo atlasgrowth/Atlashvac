@@ -157,6 +157,10 @@ export function AppShell({ children, currentPage = 'dashboard' }: AppShellProps)
                   ))
                 )}
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => window.location.href = '/prospects'}>
+                  <Users className="h-4 w-4 mr-2" />
+                  Prospect Pipeline
+                </DropdownMenuItem>
                 <DropdownMenuItem>
                   <PlusCircle className="h-4 w-4 mr-2" />
                   Add New Business
