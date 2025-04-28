@@ -6,7 +6,7 @@ import {
   type Review, type InsertReview, type Automation, type InsertAutomation, type DemoToken, type InsertDemoToken
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, sql, like, ilike } from "drizzle-orm";
+import { eq, and, desc, sql, like, ilike, or } from "drizzle-orm";
 import { OutscraperBusinessData } from "@shared/types";
 import { slugify } from "@shared/utils";
 
@@ -23,6 +23,7 @@ export interface IStorage {
   createBusiness(business: InsertBusiness): Promise<Business>;
   updateBusiness(id: number, business: Partial<InsertBusiness>): Promise<Business | undefined>;
   listBusinesses(userId?: number): Promise<Business[]>;
+  listProspects(search?: string, status?: string): Promise<Business[]>;
   importBusinessFromCSV(data: OutscraperBusinessData, userId?: number): Promise<Business>;
   
   // Contact methods
@@ -136,9 +137,36 @@ export class DatabaseStorage implements IStorage {
   
   async listBusinesses(userId?: number): Promise<Business[]> {
     if (userId) {
-      return db.select().from(businesses).where(eq(businesses.userId, userId));
+      return db.select().from(businesses).where(and(
+        eq(businesses.userId, userId),
+        eq(businesses.isProspect, false)
+      ));
     }
-    return db.select().from(businesses);
+    return db.select().from(businesses).where(eq(businesses.isProspect, false));
+  }
+  
+  async listProspects(search?: string, status?: string): Promise<Business[]> {
+    let query = db.select().from(businesses).where(eq(businesses.isProspect, true));
+    
+    // Apply search filter if provided
+    if (search) {
+      query = query.where(
+        or(
+          ilike(businesses.name, `%${search}%`),
+          ilike(businesses.address, `%${search}%`),
+          ilike(businesses.city, `%${search}%`),
+          ilike(businesses.state, `%${search}%`)
+        )
+      );
+    }
+    
+    // Apply status filter if provided
+    if (status) {
+      query = query.where(eq(businesses.leadStatus, status));
+    }
+    
+    // Order by name
+    return query.orderBy(businesses.name);
   }
   
   async importBusinessFromCSV(data: OutscraperBusinessData, userId?: number): Promise<Business> {

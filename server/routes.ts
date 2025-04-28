@@ -186,6 +186,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/verticals', (req: Request, res: Response) => {
     res.json(verticals);
   });
+
+  // Prospects (businesses with isProspect = true)
+  app.get('/api/prospects', async (req: Request, res: Response) => {
+    try {
+      const { search, status } = req.query;
+      let prospects = await storage.listProspects(search as string | undefined, status as string | undefined);
+      res.json(prospects);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching prospects", error });
+    }
+  });
+
+  // Manually re-trigger CSV seeding (protected by DEV_ONLY environment variable)
+  app.post('/api/prospects/seed', async (req: Request, res: Response) => {
+    try {
+      // Only allow this in development or if DEV_ONLY is set to true
+      if (process.env.NODE_ENV !== 'development' && process.env.DEV_ONLY !== 'true') {
+        return res.status(403).json({ message: "This endpoint is only available in development environment" });
+      }
+
+      // Import the seeding function
+      const { seedBusinessesFromCsv } = await import('./utils/seedFromCsv');
+      
+      // Force re-seed by setting environment variable to skip check
+      const originalSkipSeed = process.env.SKIP_CSV_SEED;
+      process.env.SKIP_CSV_SEED = 'false';
+      
+      await seedBusinessesFromCsv();
+      
+      // Restore original environment variable
+      process.env.SKIP_CSV_SEED = originalSkipSeed;
+      
+      res.json({ message: "CSV seeding completed successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Error seeding from CSV", error });
+    }
+  });
   
   // Contact routes
   app.get('/api/businesses/:businessId/contacts', async (req: Request, res: Response) => {
