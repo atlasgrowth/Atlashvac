@@ -1386,6 +1386,37 @@ export function SettingsPage() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Prospects Tab */}
+          <TabsContent value="prospects">
+            <Card>
+              <CardHeader>
+                <CardTitle>Prospect Pipeline</CardTitle>
+                <CardDescription>
+                  Generate demo links for potential customers to view a read-only version of your dashboard.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Use this area to manage your prospect pipeline and generate demo links for potential customers.
+                    Demo links provide a read-only view of your dashboard, allowing prospects to see how your business operates.
+                  </p>
+                  
+                  {businessId ? (
+                    <DemoTokenGenerator businessId={businessId} />
+                  ) : (
+                    <Alert>
+                      <AlertTitle>No business selected</AlertTitle>
+                      <AlertDescription>
+                        Please select a business to generate demo links.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
     </div>

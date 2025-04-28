@@ -1,11 +1,25 @@
-import { useEffect, useState } from "react";
-import { useLocation, useRoute } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Business } from "@shared/schema";
+import React, { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useRoute, useLocation } from 'wouter';
+import { AppShell } from '@/components/layout/AppShell';
+import { DashboardPage } from '@/components/dashboard/DashboardPage';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle, ArrowLeft } from 'lucide-react';
+import { Business } from '@shared/schema';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
+// Demo context to provide the business and token information
+export const DemoContext = React.createContext<{
+  business: Business | null;
+  token: string | null;
+  isDemo: boolean;
+}>({
+  business: null,
+  token: null,
+  isDemo: false,
+});
 
 interface ValidateTokenResponse {
   business: Business;
@@ -14,79 +28,112 @@ interface ValidateTokenResponse {
 }
 
 export default function DemoPage() {
-  const [match, params] = useRoute('/demo/:token');
   const [, setLocation] = useLocation();
-  const [validating, setValidating] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [match, params] = useRoute('/demo/:token');
+  const token = match ? params.token : null;
   
-  // Query to validate token
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['demoToken', params?.token],
-    queryFn: async () => {
-      if (!params?.token) return null;
-      const response = await fetch(`/api/demo/validate/${params.token}`);
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to validate token');
-      }
-      return response.json() as Promise<ValidateTokenResponse>;
-    },
-    enabled: !!params?.token,
-    retry: false
+  // Validate the demo token
+  const { data, isLoading, isError } = useQuery<ValidateTokenResponse>({
+    queryKey: ['/api/demo/validate', token],
+    enabled: !!token,
   });
   
-  useEffect(() => {
-    if (isLoading) return;
-    
-    if (isError || !data) {
-      setValidating(false);
-      setError('The demo link is invalid or has expired. Please request a new one.');
-      return;
-    }
-    
-    // If validation successful, redirect to dashboard with token as query param
-    if (data) {
-      // We'll use the token for authentication in the demo
-      setLocation(`/app/business/${data.business.id}?demo=true&token=${data.token}`);
-    }
-  }, [data, isLoading, isError, setLocation]);
+  // Calculate expiration date for display
+  const expiryDate = data?.expiresAt 
+    ? new Date(data.expiresAt) 
+    : null;
   
-  if (validating || isLoading) {
+  const isExpired = expiryDate 
+    ? new Date() > expiryDate 
+    : false;
+    
+  if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="flex min-h-screen flex-col items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Validating Demo Access</CardTitle>
-            <CardDescription>Please wait while we check your demo link...</CardDescription>
+            <CardTitle className="flex items-center">
+              <div className="mr-2 h-6 w-32">
+                <Skeleton className="h-6 w-full" />
+              </div>
+              Demo
+            </CardTitle>
+            <CardDescription>
+              <Skeleton className="h-4 w-full" />
+            </CardDescription>
           </CardHeader>
-          <CardContent className="flex justify-center p-6">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
           </CardContent>
         </Card>
       </div>
     );
   }
   
-  if (error) {
+  if (isError || !data || isExpired) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="flex min-h-screen flex-col items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-destructive">Demo Link Error</CardTitle>
-            <CardDescription>{error}</CardDescription>
+            <CardTitle className="text-red-600">Invalid Demo Link</CardTitle>
+            <CardDescription>
+              {isExpired 
+                ? "This demo link has expired."
+                : "The demo link you used is invalid or has been revoked."}
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              The demo link you're trying to use is either invalid or has expired. Please contact the business owner to request a new demo link.
-            </p>
+          <CardContent className="space-y-4">
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Access Denied</AlertTitle>
+              <AlertDescription>
+                {isExpired 
+                  ? "Please request a new demo link from the business."
+                  : "Please check the link and try again, or contact the business for a new demo link."}
+              </AlertDescription>
+            </Alert>
+            
+            <div className="flex justify-center">
+              <Button
+                onClick={() => setLocation('/')}
+                className="mt-4"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Return to Home
+              </Button>
+            </div>
           </CardContent>
-          <CardFooter>
-            <Button variant="outline" onClick={() => setLocation('/')}>Return to Homepage</Button>
-          </CardFooter>
         </Card>
       </div>
     );
   }
   
-  return null; // Will redirect to app, so we won't render this
+  // Format expiry date for display
+  const formattedExpiry = expiryDate?.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+  
+  // Render the dashboard in demo mode
+  return (
+    <DemoContext.Provider value={{ business: data.business, token: data.token, isDemo: true }}>
+      <div className="flex flex-col min-h-screen">
+        <div className="bg-yellow-100 border-b border-yellow-200 p-2 text-sm text-center">
+          <strong>Demo Mode:</strong> This is a read-only preview of {data.business.name}'s dashboard. 
+          Demo expires on {formattedExpiry}.
+        </div>
+        
+        <AppShell>
+          <DashboardPage />
+        </AppShell>
+      </div>
+    </DemoContext.Provider>
+  );
 }

@@ -42,12 +42,12 @@ export default function DemoTokenGenerator({ businessId }: DemoTokenGeneratorPro
   const generateToken = async () => {
     setIsLoading(true);
     try {
-      const response = await apiRequest<DemoTokenResponse>({
+      const response = await apiRequest({
         url: `/api/demo/businesses/${businessId}/token`,
         method: 'POST'
       });
       
-      setDemoToken(response);
+      setDemoToken(response as DemoTokenResponse);
       toast({
         title: "Demo link generated",
         description: "You can now share this link with prospects",
