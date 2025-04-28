@@ -1,0 +1,78 @@
+**What you’re really asking for (in plain English)**  
+You want the **root URL (`/`) to become a “prospect pipeline” CRM** that lists every HVAC (or other-trade) company you imported from that Outscraper CSV. From that page you (the agency) can:  
+
+* see each lead’s name, status, phone & email,  
+* one-click open the **public one-page site** we’re auto-generating at `/business/{slug}`, and  
+* copy a special **“magic link”** that auto-logs the prospect into the back-office demo (`/demo/{token}`) so they can poke around without creating a password.  
+
+The rest of the portal (Dashboard, Messages, Contacts, etc.) stays where it is under `/app/*`, but a prospect only reaches it through the magic link. All data lives in the existing Neon-Postgres / Drizzle setup—**no Supabase**—so we’ll add one small table for login tokens and another flag to show whether a Business row is still a prospect or a paying customer.  
+
+---
+
+## Copy-this-into-Replit ► Prompt: “Prospect Pipeline & Magic-Link Demo”
+
+> **Objective**  
+> 1. Turn the root route (`/`) into a **ProspectPipeline** React page that lists every Business row where `isProspect = true`.  
+> 2. Generate **auto-login links** that let a prospect open the back-office demo without signing up.  
+> 3. Make the existing `/app/*` pages require either an authenticated agency user **or** a valid demo token cookie.  
+>
+> **Database changes (Drizzle + Neon)**  
+> ```ts
+> // shared/schema.ts
+> model Business {
+>   id            serial        @id
+>   name          text
+>   slug          text          @unique
+>   vertical      text
+>   /* …existing cols… */
+>   isProspect    boolean       @default(true)
+>   leadStatus    text          @default('new') // new | contacted | follow_up | closed
+> }
+>
+> model DemoToken {
+>   id            serial        @id
+>   token         text          @unique
+>   businessId    integer       @references(Business.id)
+>   expiresAt     timestamp
+> }
+> ```
+> Run `pnpm drizzle:push` to apply.  
+>
+> **Server tasks (`server/routes.ts`)**  
+> 1. `POST /api/demo-tokens` body `{ businessId }`  
+>    * create a `DemoToken` row with a UUID token and `expiresAt = NOW() + INTERVAL '7 days'`.  
+>    * respond with `{ url: "/demo/"+token }`.  
+> 2. `GET /demo/:token`  
+>    * verify token exists & not expired → set `Set-Cookie: demoToken=<token>; HttpOnly; Path=/; SameSite=Lax` then `302` redirect to `/app/dashboard?biz=<businessId>`.  
+> 3. Express middleware `requireBusinessAuth`  
+>    * Allow if `req.headers.authorization` has a valid agency JWT **or** cookie `demoToken` matches the `businessId` in query params.  
+>    * 401 otherwise.  
+>
+> **Front-end tasks (Vite React + wouter)**  
+> 1. **ProspectPipeline page** (`client/src/pages/ProspectPipeline.tsx`)  
+>    * Fetch `/api/businesses?isProspect=true`.  
+>    * Data table columns: Business, Phone, Email, Lead Status (editable select), Preview Site button (`/business/{slug}`), “Copy Magic Link” icon that calls `/api/demo-tokens` and copies the returned URL to clipboard.  
+>    * Route `/` → `<ProspectPipeline />`.  
+> 2. Move current `client/src/pages/app.tsx` file to `AppRouter.tsx`. Update all links (`/app/...`) to include a `biz` query param and pass it via React Context instead of defaulting to the first business  ([Atlashvac/client/src/pages/app.tsx at main · atlasgrowth/Atlashvac · GitHub](https://github.com/atlasgrowth/Atlashvac/blob/main/client/src/pages/app.tsx)).  
+> 3. On first render of AppShell, read `biz` from `URLSearchParams` **or** look up the `demoToken` cookie → fetch that business and set it with `setCurrentBusiness` (remove hard-coded Acme demo data).  
+> 4. Add a tiny banner in the header when `demoToken` is active: “Demo mode – data resets nightly.”  
+>
+> **Acceptance-tests / Definition-of-done**  
+> * Visiting `/` shows the ten HVAC rows imported from CSV; no “Acme / Sunshine Plumbing” placeholders remain.  
+> * Clicking “Copy Magic Link” creates a URL like `https://your-repl-project.repl.co/demo/abc123` and copies it.  
+> * Opening that URL in a private tab lands on `/app/dashboard` already scoped to that business; the header displays “Demo mode”.  
+> * Refreshing `/app/messages` keeps the same business context (uses cookie).  
+>
+> **Constraints**  
+> * Keep Drizzle + Neon pool (no Supabase).  ([Atlashvac/server/db.ts at main · atlasgrowth/Atlashvac · GitHub](https://github.com/atlasgrowth/Atlashvac/blob/main/server/db.ts))  
+> * Use Tailwind for the ProspectPipeline table (`table-auto`, responsive stack on mobile).  
+> * Store demo cookies for 7 days max; delete token row when a prospect signs up for real (`isProspect = false`).  
+>
+> **Deliverables**  
+> * SQL migration + updated schema, routes, and new React pages.  
+> * README section “Running demo tokens locally” with `curl` example.  
+>
+> **Stretch (optional)**  
+> * Cron job that purges expired `DemoToken` rows nightly.
+
+Paste everything above into Replit’s “Describe what you want” box, run the agent, then commit & push the generated code. I’ll review the commit and give you the next set of instructions.

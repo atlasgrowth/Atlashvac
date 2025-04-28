@@ -4,6 +4,7 @@ import { z } from "zod";
 
 // Enums
 export const businessVerticalEnum = pgEnum('business_vertical', ['hvac', 'plumbing', 'electrical', 'cleaning', 'landscaping', 'roofing', 'general']);
+export const leadStatusEnum = pgEnum('lead_status', ['new', 'contacted', 'follow_up', 'closed']);
 export const messageStatusEnum = pgEnum('message_status', ['unread', 'read', 'replied']);
 export const jobStatusEnum = pgEnum('job_status', ['scheduled', 'in_progress', 'completed', 'cancelled']);
 export const automationTriggerEnum = pgEnum('automation_trigger', ['job_completed', 'new_customer', 'new_message', 'appointment_scheduled', 'custom']);
@@ -40,6 +41,8 @@ export const businesses = pgTable("businesses", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   settings: json("settings").$type<Record<string, any>>().default({}),
+  isProspect: boolean("is_prospect").default(true),
+  leadStatus: leadStatusEnum("lead_status").default("new"),
 });
 
 // Contacts table
@@ -156,6 +159,15 @@ export const automations = pgTable("automations", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Demo Tokens table
+export const demoTokens = pgTable("demo_tokens", {
+  id: serial("id").primaryKey(),
+  token: text("token").notNull().unique(),
+  businessId: integer("business_id").references(() => businesses.id).notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Define insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -217,6 +229,11 @@ export const insertAutomationSchema = createInsertSchema(automations).omit({
   updatedAt: true,
 });
 
+export const insertDemoTokenSchema = createInsertSchema(demoTokens).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Define types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -247,3 +264,6 @@ export type Review = typeof reviews.$inferSelect;
 
 export type InsertAutomation = z.infer<typeof insertAutomationSchema>;
 export type Automation = typeof automations.$inferSelect;
+
+export type InsertDemoToken = z.infer<typeof insertDemoTokenSchema>;
+export type DemoToken = typeof demoTokens.$inferSelect;
