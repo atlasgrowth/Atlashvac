@@ -8,6 +8,7 @@ import { BusinessProvider } from "@/hooks/useBusinessContext";
 import NotFound from "@/pages/not-found";
 import AppPage from "@/pages/app";
 import BusinessPage from "@/pages/business/[slug]";
+import DemoPage from "@/pages/demo";
 
 function Router() {
   return (
@@ -19,6 +20,9 @@ function Router() {
           return null;
         }}
       </Route>
+      
+      {/* Demo access route */}
+      <Route path="/demo/:token" component={DemoPage} />
       
       {/* Public marketing site route */}
       <Route path="/:slug" component={BusinessPage} />

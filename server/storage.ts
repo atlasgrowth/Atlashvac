@@ -491,6 +491,22 @@ export class DatabaseStorage implements IStorage {
       avgReview: Number(avgReview.toFixed(1)) || 0
     };
   }
+  
+  // Demo token methods
+  async getDemoToken(id: number): Promise<DemoToken | undefined> {
+    const [token] = await db.select().from(demoTokens).where(eq(demoTokens.id, id));
+    return token;
+  }
+  
+  async getDemoTokenByToken(token: string): Promise<DemoToken | undefined> {
+    const [demoToken] = await db.select().from(demoTokens).where(eq(demoTokens.token, token));
+    return demoToken;
+  }
+  
+  async createDemoToken(token: InsertDemoToken): Promise<DemoToken> {
+    const [newToken] = await db.insert(demoTokens).values(token).returning();
+    return newToken;
+  }
 }
 
 export const storage = new DatabaseStorage();
