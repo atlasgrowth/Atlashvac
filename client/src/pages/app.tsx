@@ -11,6 +11,7 @@ import { AutomationsPage } from '@/components/automations/AutomationsPage';
 import { WebsitePage } from '@/components/website/WebsitePage';
 import { SettingsPage } from '@/components/settings/SettingsPage';
 import { useBusinessContext } from '@/hooks/useBusinessContext';
+import { Business } from '@shared/schema';
 
 export default function AppPage() {
   const [, navigate] = useLocation();
@@ -19,7 +20,7 @@ export default function AppPage() {
   const { setCurrentBusiness } = useBusinessContext();
   
   // Fetch businesses
-  const { data: businesses = [], isLoading } = useQuery({
+  const { data: businesses = [] as Business[], isLoading } = useQuery<Business[]>({
     queryKey: ['/api/businesses'],
   });
   

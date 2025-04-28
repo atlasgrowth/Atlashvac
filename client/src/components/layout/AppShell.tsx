@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { useBusinessContext } from '@/hooks/useBusinessContext';
+import { Business } from '@shared/schema';
 import {
   MessageSquare,
   Users,

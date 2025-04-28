@@ -12,6 +12,14 @@ import BusinessPage from "@/pages/business/[slug]";
 function Router() {
   return (
     <Switch>
+      {/* Home route redirects to app dashboard */}
+      <Route path="/">
+        {() => {
+          window.location.href = "/app/dashboard";
+          return null;
+        }}
+      </Route>
+      
       {/* Public marketing site route */}
       <Route path="/:slug" component={BusinessPage} />
       
