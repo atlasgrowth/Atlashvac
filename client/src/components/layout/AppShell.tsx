@@ -3,6 +3,7 @@ import { Link, useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { useBusinessContext } from '@/hooks/useBusinessContext';
 import { Business } from '@shared/schema';
+import { safelySetBusinessData } from '@/lib/utils';
 import {
   MessageSquare,
   Users,
@@ -64,8 +65,12 @@ export function AppShell({ children, currentPage = 'dashboard' }: AppShellProps)
   });
   
   // Handle business selection
-  const handleBusinessSelect = (business: Business) => {
-    setCurrentBusiness(business);
+  const handleBusinessSelect = (business: any) => {
+    // Convert null values to undefined for type compatibility
+    const safeBusiness = safelySetBusinessData(business);
+    if (safeBusiness) {
+      setCurrentBusiness(safeBusiness);
+    }
   };
   
   // Handle logout
