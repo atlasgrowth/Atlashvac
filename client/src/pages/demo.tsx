@@ -9,6 +9,7 @@ import { AlertCircle, ArrowLeft } from 'lucide-react';
 import { Business } from '@shared/schema';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { apiRequest } from '@/lib/queryClient';
 
 // Demo context to provide the business and token information
 export const DemoContext = React.createContext<{
@@ -32,21 +33,51 @@ export default function DemoPage() {
   const [match, params] = useRoute('/demo/:token');
   const token = match ? params.token : null;
   
-  // Validate the demo token
-  const { data, isLoading, isError } = useQuery<ValidateTokenResponse>({
+  // Get business ID from query params (for direct business demo mode)
+  const searchParams = new URLSearchParams(window.location.search);
+  const businessId = searchParams.get('businessId');
+  
+  // Fetch business by token or by ID
+  const { 
+    data: tokenData,
+    isLoading: isTokenLoading, 
+    isError: isTokenError 
+  } = useQuery<ValidateTokenResponse>({
     queryKey: ['/api/demo/validate', token],
     enabled: !!token,
   });
   
-  // Calculate expiration date for display
-  const expiryDate = data?.expiresAt 
-    ? new Date(data.expiresAt) 
+  // Fetch business if businessId is provided (for direct business demo)
+  const { 
+    data: businessData,
+    isLoading: isBusinessLoading, 
+    isError: isBusinessError 
+  } = useQuery<Business>({
+    queryKey: ['/api/businesses', businessId],
+    queryFn: async () => {
+      const response = await apiRequest(`/api/businesses/${businessId}`);
+      return response as Business;
+    },
+    enabled: !!businessId,
+  });
+  
+  // Determine which data source to use
+  const isLoading = (!!token && isTokenLoading) || (!!businessId && isBusinessLoading);
+  const isError = (!!token && isTokenError) || (!!businessId && isBusinessError);
+  
+  // Get the business data from either source
+  const business = token ? tokenData?.business : businessData;
+  
+  // Calculate expiration date for display (token mode only)
+  const expiryDate = tokenData?.expiresAt 
+    ? new Date(tokenData.expiresAt) 
     : null;
   
   const isExpired = expiryDate 
     ? new Date() > expiryDate 
     : false;
     
+  // Return loading state
   if (isLoading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-4">
@@ -73,14 +104,15 @@ export default function DemoPage() {
     );
   }
   
-  if (isError || !data || isExpired) {
+  // Return error state
+  if (isError || (!business) || (token && isExpired)) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-red-600">Invalid Demo Link</CardTitle>
             <CardDescription>
-              {isExpired 
+              {token && isExpired 
                 ? "This demo link has expired."
                 : "The demo link you used is invalid or has been revoked."}
             </CardDescription>
@@ -90,7 +122,7 @@ export default function DemoPage() {
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Access Denied</AlertTitle>
               <AlertDescription>
-                {isExpired 
+                {token && isExpired 
                   ? "Please request a new demo link from the business."
                   : "Please check the link and try again, or contact the business for a new demo link."}
               </AlertDescription>
@@ -111,7 +143,7 @@ export default function DemoPage() {
     );
   }
   
-  // Format expiry date for display
+  // Format expiry date for display (token mode only)
   const formattedExpiry = expiryDate?.toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
@@ -123,11 +155,17 @@ export default function DemoPage() {
   
   // Render the dashboard in demo mode
   return (
-    <DemoContext.Provider value={{ business: data.business, token: data.token, isDemo: true }}>
+    <DemoContext.Provider value={{ 
+      business: business, 
+      token: tokenData?.token || null, 
+      isDemo: true 
+    }}>
       <div className="flex flex-col min-h-screen">
         <div className="bg-yellow-100 border-b border-yellow-200 p-2 text-sm text-center">
-          <strong>Demo Mode:</strong> This is a read-only preview of {data.business.name}'s dashboard. 
-          Demo expires on {formattedExpiry}.
+          <strong>Demo Mode:</strong> This is a read-only preview of {business.name}'s dashboard.
+          {token && formattedExpiry && (
+            <span> Demo expires on {formattedExpiry}.</span>
+          )}
         </div>
         
         <AppShell>

@@ -9,6 +9,7 @@ import NotFound from "@/pages/not-found";
 import AppPage from "@/pages/app";
 import BusinessPage from "@/pages/business/[slug]";
 import DemoPage from "@/pages/demo";
+import ProspectsPage from "@/pages/prospects";
 
 function Router() {
   return (
@@ -22,7 +23,11 @@ function Router() {
       </Route>
       
       {/* Demo access route */}
+      <Route path="/demo" component={DemoPage} />
       <Route path="/demo/:token" component={DemoPage} />
+      
+      {/* Prospects management route */}
+      <Route path="/prospects" component={ProspectsPage} />
       
       {/* Public marketing site route */}
       <Route path="/:slug" component={BusinessPage} />

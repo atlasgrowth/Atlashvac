@@ -146,11 +146,12 @@ export class DatabaseStorage implements IStorage {
   }
   
   async listProspects(search?: string, status?: string): Promise<Business[]> {
-    let query = db.select().from(businesses).where(eq(businesses.isProspect, true));
+    let queryBuilder = db.select().from(businesses);
+    let conditions = [eq(businesses.isProspect, true)];
     
     // Apply search filter if provided
     if (search) {
-      query = query.where(
+      conditions.push(
         or(
           ilike(businesses.name, `%${search}%`),
           ilike(businesses.address, `%${search}%`),
@@ -162,11 +163,13 @@ export class DatabaseStorage implements IStorage {
     
     // Apply status filter if provided
     if (status) {
-      query = query.where(eq(businesses.leadStatus, status));
+      conditions.push(eq(businesses.leadStatus, status));
     }
     
-    // Order by name
-    return query.orderBy(businesses.name);
+    // Apply all conditions with AND
+    return queryBuilder
+      .where(and(...conditions))
+      .orderBy(businesses.name);
   }
   
   async importBusinessFromCSV(data: OutscraperBusinessData, userId?: number): Promise<Business> {
