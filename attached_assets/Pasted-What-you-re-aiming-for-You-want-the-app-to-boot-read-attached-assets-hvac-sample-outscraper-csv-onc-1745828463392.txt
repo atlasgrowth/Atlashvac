@@ -1,0 +1,101 @@
+What you’re aiming for
+You want the app to boot, read attached_assets/hvac_sample_outscraper.csv once, seed the businesses table, and then:
+
+/ → “Prospect Pipeline”: a table of those CSV businesses (still marked isProspect = true).
+
+/business/{slug}: the public one-page marketing site for each record.
+
+/demo/{token}: a magic-link that drops the prospect straight into the back-office at /app/dashboard?biz={id} without a password.
+
+All future pages under /app/* must respect the active business chosen via that query-param or demo-cookie.
+
+No Supabase—stay with the existing Neon + Drizzle setup.
+
+Right now the code still shows hard-coded “Acme HVAC Services / Sunshine Plumbing” because there’s no CSV seeding and no pipeline route yet. The database already has the fields we need (isProspect, leadStatus, demo_tokens) 
+GitHub
+, and the Neon pool is ready 
+GitHub
+—we just have to wire everything up.
+
+Copy-this-prompt into Replit’s “Describe what you want” box
+Feature pack: CSV seeding → Prospect Pipeline → Magic-Link demo
+
+1 · CSV seeding on server start
+If table businesses is empty AND process.env.SKIP_CSV_SEED is not "true", read attached_assets/hvac_sample_outscraper.csv.
+
+Parse with csv-parse/sync; map columns ⇒ insertBusinessSchema (infer vertical “hvac”).
+
+is_prospect = true, lead_status = 'new'.
+
+Idempotent: on restart, skip rows whose slug already exists.
+
+2 · Prospect Pipeline route
+Back-end (server/routes.ts)
+GET /api/prospects ➜ SELECT * FROM businesses WHERE is_prospect = true ORDER BY created_at;
+
+Accept ?search= (ILIKE name or city) and ?status= filter.
+
+Front-end (client/src/pages/ProspectPipeline.tsx)
+Route / renders a Tailwind table (table-auto w-full). Columns: Business · City/State · Phone · Lead Status (select) · “Preview Site” button /business/{slug} · “Copy Magic Link” icon.
+
+A top-right “Seed again” button calls POST /api/prospects/seed which reruns the CSV import (protected by DEV_ONLY=true).
+
+3 · Magic-link workflow
+DB migration (Drizzle): create demo_tokens table if not present (check first).
+
+POST /api/demo-tokens body { businessId }
+
+Generate crypto.randomUUID(), expiresAt = NOW() + INTERVAL '7 days' and return { url: "/demo/"+token }.
+
+GET /demo/:token
+
+Validate token; Set-Cookie: demoToken=<token>; Path=/; HttpOnly; SameSite=Lax and 302 to /app/dashboard?biz={businessId}.
+
+Express requireBusinessAuth middleware (edit existing one or add new):
+
+Pass if header x-agency-secret == process.env.AGENCY_SECRET, OR cookie demoToken maps to same businessId in the query string.
+
+Fail 401 otherwise.
+
+Front-end helper useActiveBusiness() looks at biz query-param first, then tries /api/auth/demo-token (returns current business if token cookie valid).
+
+Show a small yellow banner “DEMO MODE – data resets nightly” when request is authorized through demo token.
+
+4 · Public marketing site
+Ensure client/src/pages/business/[slug].tsx fetches /api/businesses/{slug} so it now renders real CSV data (no placeholders).
+
+5 · Acceptance criteria (done-when)
+Booting npm run dev seeds 10 rows if DB empty.
+
+Hitting http://localhost:5173/ shows those 10 HVAC companies, no Acme demo rows.
+
+Clicking “Preview” opens /business/blue-sky-hvac and shows Blue Sky HVAC info from CSV.
+
+“Copy Magic Link” copies http://localhost:5173/demo/abc123 to clipboard.
+
+Opening that link in a private tab lands on /app/dashboard?biz=<id> already logged in (banner shows DEMO MODE).
+
+Refreshing /app/messages keeps the same business context (still demo cookie).
+
+6 · Constraints & tooling
+No Supabase—continue using Neon Postgres + Drizzle.
+
+Use csv-parse not papaparse (Node-only).
+
+Keep ENV secrets in .replit or .env (DATABASE_URL, AGENCY_SECRET).
+
+7 · Deliverables
+server/utils/seedFromCsv.ts script imported by server/index.ts.
+
+New API routes & middleware.
+
+React pages/components for Prospect Pipeline.
+
+One Drizzle migration file.
+
+README update: SKIP_CSV_SEED, AGENCY_SECRET, and how to re-seed.
+
+8 · (Stretch) nightly cron
+If time: add a CRON in .replit to DELETE FROM demo_tokens WHERE expires_at < NOW();.
+
+Generate all code, run Drizzle push, and make sure npm run dev boots without errors.
